@@ -4,4 +4,3 @@
 
 ## how to execute?
 <pre><code> roslaunch wc_vision wc_vision.launch </code></pre>
-
