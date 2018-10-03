@@ -1,22 +1,41 @@
 <launch>
-
+<!-- ::: node 1: camera access -->
 <arg name="device_id" default= "-1"/>
-<arg name="vocabulary_file_path" default = "/home/lwcworld/git/ORB_SLAM2/Vocabulary/ORBvoc.txt"/>
-<arg name="orb_slam2_settings_file_path" default = "$(find orb_slam_2_ros)/config/euroc/euroc.yaml"/>
-<arg name="camera_calibration_file_path" default = "$(find orb_slam_2_ros)/config/euroc/camchain.yaml"/>
-
-
-<!-- camera access -->
 <node name="camera" pkg="cv_camera" type="cv_camera_node" output="screen">
 	<param name="device_id" value="$(arg device_id)" />
 </node> 
 
-
-<!-- ORB SLAM2 stereo. -->
+<!-- ::: node 2: ORB SLAM2 stereo. -->
+<arg name="vocabulary_file_path" default = "/home/lwcworld/git/ORB_SLAM2/Vocabulary/ORBvoc.txt"/>
+<arg name="orb_slam2_settings_file_path" default = "$(find orb_slam_2_ros)/config/euroc/euroc.yaml"/>
+<arg name="camera_calibration_file_path" default = "$(find orb_slam_2_ros)/config/euroc/camchain.yaml"/>
 <node pkg="orb_slam_2_ros" name="orb_slam_2_ros_node" type="orb_slam_2_ros_node" output="screen">
 	<param name="interface_type" value="mono" />
 	<param name="vocabulary_file_path" value="$(arg vocabulary_file_path)"/>
 	<param name="settings_file_path" value="$(arg orb_slam2_settings_file_path)"/>
 	<param name="visualization" type="bool" value="true"/>
 </node>
+
+<!-- ::: node 3: Yolo V3 -->
+<!-- Console launch prefix -->
+<arg name="launch_prefix" default=""/>
+
+<!-- Config and weights folder. -->
+<arg name="yolo_weights_path"          default="$(find darknet_ros)/yolo_network_config/weights"/>
+<arg name="yolo_config_path"           default="$(find darknet_ros)/yolo_network_config/cfg"/>
+
+<!-- Load parameters -->
+<rosparam command="load" ns="darknet_ros" file="$(find darknet_ros)/config/ros.yaml"/>
+<rosparam command="load" ns="darknet_ros" file="$(find darknet_ros)/config/yolov3.yaml"/>
+
+<!-- Start darknet and ros wrapper -->
+<node pkg="darknet_ros" type="darknet_ros" name="darknet_ros" output="screen" launch-prefix="$(arg launch_prefix)">	
+	<param name="weights_path"          value="$(arg yolo_weights_path)" />
+	<param name="config_path"           value="$(arg yolo_config_path)" />        
+</node>
+
+<!-- ::: node 4: Topic relay -->
+<node name="relay" pkg="topic_tools" type="relay" args="/camera/image_raw /camera/rgb/image_raw" output="screen">
+</node> 
+
 </launch>
