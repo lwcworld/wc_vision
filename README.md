@@ -4,3 +4,9 @@
 
 ## how to execute?
 <pre><code> roslaunch wc_vision wc_vision.launch </code></pre>
+
+## dealing errors
+#### 1. /ORB_SLAM2/src/System.cc:134:28: error: ‘usleep’ was not declared in this scope usleep(1000);
+- https://github.com/raulmur/ORB_SLAM2/issues/317
+- https://github.com/raulmur/ORB_SLAM2/pull/144
+
